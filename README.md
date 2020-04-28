@@ -25,7 +25,7 @@ That being said, if you want help feel free to reach out, I just can't guarantee
     - [x] Hello window
     - [x] Hello Triangle
     - [x] Shaders
-    - [ ] Textures
+    - [x] Textures
     - [ ] Transformations
     - [ ] Coordinate Systems
     - [ ] Camera
