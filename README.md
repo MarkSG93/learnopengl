@@ -4,6 +4,8 @@ This is a repo I use to log all of the exercises / tutorials I follow on https:/
 
 I may make different tags to show the history of the repo as I follow the tutorials, or I might make separate folders. Not entirely sure yet, but if you're looking for examples you'll be able to tell in the `tags` of the repo or by the folder structure.
 
+**N.B** This is my own source code, so it will be a different layout and structure. I found at the end of the shaders section the code was rather messy so I tidied up the `Shader` class. All of the loading code was directly in the constructor 😱 
+
 ## OpenGL Version
 In `main.cpp` it's hard coded to 4.1, so you'll probably want to change that based on your system/requirements.
 
