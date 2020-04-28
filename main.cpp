@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+
+#include "stb_image.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -25,7 +28,7 @@ void processInput(GLFWwindow *window) {
   }
 }
 
-void render(GLFWwindow* window, Shader shader, unsigned int vao, unsigned ebo) {
+void render(GLFWwindow* window, unsigned int vao, unsigned int ebo, unsigned int textures[]) {
   // Input
   processInput(window);
 
@@ -33,32 +36,57 @@ void render(GLFWwindow* window, Shader shader, unsigned int vao, unsigned ebo) {
   glClearColor(0.2f, 0.8f, 0.5f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  shader.use();
+  // Texture units
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, textures[0]);
 
-  // Update uniform color
-  float timeValue = glfwGetTime();
-  float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-  shader.setFloat4("ourColor", 0.5f, greenValue, 0.2f, 1.0f);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, textures[1]);
 
   glBindVertexArray(vao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  glBindVertexArray(0);
+
+//  glBindVertexArray(0);
 
   // check and call events and swap the buffers
   glfwPollEvents();
   glfwSwapBuffers(window);
 }
 
-void checkShaderSuccess(unsigned int shader, unsigned int shaderIv) {
-  // Shader compilation success
-  int  success;
-  char infoLog[512];
-  glGetShaderiv(shader, shaderIv, &success);
+unsigned int generateTexture(const char* path, unsigned int colorChannelType) {
+  stbi_set_flip_vertically_on_load(true);
+  // binding texture object
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
 
-  if(!success) {
-    glGetShaderInfoLog(shader, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+  // set texture wrapping options on the currently bound texture
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  // load texture
+  int width, height, nrChannels;
+  unsigned char *imageData = stbi_load(
+    path,
+    &width,
+    &height,
+    &nrChannels,
+    0
+  );
+
+  // apply texture
+  if (!imageData) {
+    std::cout << "Failed to load texture" << std::endl;
+    return -1;
   }
+
+  glTexImage2D(GL_TEXTURE_2D, 0, colorChannelType, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  stbi_image_free(imageData);
+  return texture;
 }
 
 int main() {
@@ -80,17 +108,28 @@ int main() {
 
   // Resizing a window callback
   // Gets called on first load as well
-  glViewport(0, 0, 1024, 768);
+//  glViewport(0, 0, 1024, 768);
   glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
 
   float vertices[] = {
-    0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top middle
-    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f // bottom left
+    // positions         // colors           // texture coords
+    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
   };
+
+//  float vertices[] = {
+//    // positions         // colors           // texture coords
+//    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
+//    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,
+//    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,
+//    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,
+//  };
+
   unsigned int indices[] = {
-    0, 1, 2, // first triangle
-//    1, 2, 3, // second triangle
+    0, 1, 3, // first triangle
+    1, 2, 3, // second triangle
   };
 
   // Vertex Array Objects
@@ -103,12 +142,6 @@ int main() {
   glGenBuffers(1, &VBO); // Generate a buffer
   glBindBuffer(GL_ARRAY_BUFFER, VBO); // Bind the buffer to GL_ARRAY_BUFFER target
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Transfer data into the currently bound buffer
-  // Set the vertex attributes pointers
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
-  glEnableVertexAttribArray(0);
-  //color attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
 
   // Element Buffer Object
   unsigned int EBO;
@@ -116,12 +149,36 @@ int main() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+  // Set the vertex attributes pointers
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+  glEnableVertexAttribArray(0);
+
+  //color attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  //texture attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
   Shader shader("/Users/mark.griffiths/projects/open-gl/learnopengl/shaders/vertexshader.glsl", "/Users/mark.griffiths/projects/open-gl/learnopengl/shaders/fragmentshader.glsl");
   shader.loadShaders();
+
+  unsigned int texture = generateTexture("/Users/mark.griffiths/projects/open-gl/learnopengl/textures/wood-planks.jpg", GL_RGB);
+  unsigned int texture2 = generateTexture("/Users/mark.griffiths/projects/open-gl/learnopengl/textures/meme.png", GL_RGBA);
+
+  unsigned int textures[] = { texture, texture2 };
   // Render loop
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  shader.use();
+  glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
+  shader.setInt("texture2", 1);
+
   while(!glfwWindowShouldClose(window)) {
-    render(window, shader, VAO, EBO);
+    render(window, VAO, EBO, textures);
   }
 
   glfwTerminate();
