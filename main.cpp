@@ -5,6 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cmath>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "shaders/shader.h"
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -28,13 +31,21 @@ void processInput(GLFWwindow *window) {
   }
 }
 
-void render(GLFWwindow* window, unsigned int vao, unsigned int ebo, unsigned int textures[]) {
+void render(GLFWwindow* window, unsigned int vao, unsigned int ebo, unsigned int textures[], Shader shader) {
   // Input
   processInput(window);
 
   // rendering commands
   glClearColor(0.2f, 0.8f, 0.5f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+
+  glm::mat4 trans = glm::mat4(1.0f);
+  float time = (float)glfwGetTime();
+  trans = glm::rotate(trans, -time, glm::vec3(0.0, 0.0, 1.0));
+//  trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+
+  unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
   // Texture units
   glActiveTexture(GL_TEXTURE0);
@@ -178,7 +189,7 @@ int main() {
   shader.setInt("texture2", 1);
 
   while(!glfwWindowShouldClose(window)) {
-    render(window, VAO, EBO, textures);
+    render(window, VAO, EBO, textures, shader);
   }
 
   glfwTerminate();

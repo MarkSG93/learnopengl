@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 add_subdirectory(external/glfw-3.3.2)
 include_directories(external/glfw-3.3.2/include)
 include_directories(external/glad/include)
+include_directories(external/glm)
 include_directories(external)
 add_library(gladc external/glad/src/glad.c)
 

@@ -10,7 +10,7 @@ I may make different tags to show the history of the repo as I follow the tutori
 In `main.cpp` it's hard coded to 4.1, so you'll probably want to change that based on your system/requirements.
 
 ## Running the project
-This project was setup on Mac OS X with the CLion IDE. I've included the glfw-3.3.2 and glad dependecies in the repo so it should hopefully build with CMake straight away.
+This project was setup on Mac OS X with the CLion IDE. I've included the glfw-3.3.2 and glad dependencies in the repo so it should hopefully build with CMake straight away.
 
 ## Getting Help
 I am a complete n00b when it comes to OpenGL. I'm doing this because 
@@ -26,7 +26,7 @@ That being said, if you want help feel free to reach out, I just can't guarantee
     - [x] Hello Triangle
     - [x] Shaders
     - [x] Textures
-    - [ ] Transformations
+    - [x] Transformations
     - [ ] Coordinate Systems
     - [ ] Camera
     - [ ] Review 
