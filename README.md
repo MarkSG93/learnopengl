@@ -4,6 +4,8 @@ This is a repo I use to log all of the exercises / tutorials I follow on https:/
 
 I may make different tags to show the history of the repo as I follow the tutorials, or I might make separate folders. Not entirely sure yet, but if you're looking for examples you'll be able to tell in the `tags` of the repo or by the folder structure.
 
+## OpenGL Version
+In `main.cpp` it's hard coded to 4.1, so you'll probably want to change that based on your system/requirements.
 
 ## Running the project
 This project was setup on Mac OS X with the CLion IDE. I've included the glfw-3.3.2 and glad dependecies in the repo so it should hopefully build with CMake straight away.
