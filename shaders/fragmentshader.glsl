@@ -12,5 +12,5 @@ void main() {
 //  FragColor = vec4(vertexColor, 1.0);
 //  FragColor = vec4(ourColor);
 //  FragColor = texture(ourTexture, TexCoord);
-  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 1.0f);
 }
