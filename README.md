@@ -35,3 +35,6 @@ That being said, if you want help feel free to reach out, I just can't guarantee
 - [ ] Advanced OpenGL 😱
 - [ ] Advanced Lighting
 - [ ] PBR 
+
+## Pro Tip
+Don't forget to increase your stride when you add more vertex attributes to your vertices array! Spent an hour debugging this 😬
